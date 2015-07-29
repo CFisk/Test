@@ -6,7 +6,8 @@
             currentMoney: 0,
             updateMoney: function (amt) {
                 this.currentMoney += amt;
-                money_div.html('$' + this.currentMoney.toFixed(2));
+                money_div.html('<div class="background"></div>' + '$' + this.currentMoney.toFixed(2));
+                money_div.attr('data-amt', Math.round(this.currentMoney));
             }
 
         };
@@ -41,8 +42,8 @@
 
         var Upgrade = {
             currentStep: 0,
-            addUpgrade: function (stepto) {
-                this.currentStep += stepto;
+            addUpgrade: function (inc) {
+                this.currentStep += inc;
                 this.upgradePower(this.currentStep * .1);
             },
             upgradePower: function (amt) {
@@ -69,59 +70,59 @@
         function reveal_upgrade() {
             $(left_div).addClass('step-1');
             $.ajax({
-                    url: '/upgrades'
+                url: '/upgrades'
             }).done(function (html) {
-        $(left_div).append(html);
-        window.setTimeout(function () {
-            $('.upgrade-panel').addClass('revealed');
-        }, 1000);
-        $('.upgrades').on('click', function (e) {
-            upgradeHandler(e.target, $(e.target).attr('data-cost'));
-            $(e.target).css('display', 'none');
+                $(left_div).append(html);
+                window.setTimeout(function () {
+                    $('.upgrade-panel').addClass('revealed');
+                }, 1000);
+                $('.upgrades').on('click', function (e) {
+                    upgradeHandler(e.target, $(e.target).attr('data-cost'));
+                    $(e.target).css('display', 'none');
+                });
+
+
+            });
+
+        }
+
+        $(button).on('click', function () {
+            click();
+            if (Money.currentMoney == 10) {
+                reveal_upgrade();
+            }
         });
 
+        var a = 0;
 
-    });
+        $('.worker-button').on('click', function () {
+            if (Money.currentMoney >= Workforce.currentPrice) {
+                var cost = Workforce.currentPrice;
+                Money.updateMoney(-cost);
+                buy_worker(a);
+                $('.worker-price').html('$' + Workforce.currentPrice);
 
-}
+            }
+        });
 
-$(button).on('click', function () {
-    click();
-    if (Money.currentMoney == 10) {
-        reveal_upgrade();
-    }
-});
-
-var a = 0;
-
-$('.worker-button').on('click', function () {
-    if (Money.currentMoney >= Workforce.currentPrice) {
-        var cost = Workforce.currentPrice;
-        Money.updateMoney(cost * (-1));
-        buy_worker(a);
-        $('.worker-price').html('$' + Workforce.currentPrice);
-
-    }
-});
-
-function buy_worker() {
-    clear_interval();
-    Workforce.addWorker(1, Workforce.currentPrice * 0.2);
-    $('.worker-counter').html(Workforce.currentWorkers);
-    Workforce.startWork();
-    console.log(Workforce.currentMPS);
-    $('.worker-mps').html(Workforce.currentMPS);
-}
+        function buy_worker() {
+            clear_interval();
+            Workforce.addWorker(1, Workforce.currentPrice * 0.2);
+            $('.worker-counter').html(Workforce.currentWorkers);
+            Workforce.startWork();
+            console.log(Workforce.currentMPS);
+            $('.worker-mps').html(Workforce.currentMPS);
+        }
 
 
-function upgradeHandler(btn, cost) {
-    var btn_num = $(btn).prop('id');
-    Money.updateMoney(-cost);
-    Upgrade.addUpgrade(btn_num);
-}
+        function upgradeHandler(btn, cost) {
+            var btn_num = $(btn).prop('id');
+            Money.updateMoney(-cost);
+            Upgrade.addUpgrade(btn_num);
+        }
 
-})
-;
+    })
+    ;
 
 
 })
